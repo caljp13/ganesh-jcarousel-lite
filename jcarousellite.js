@@ -2,9 +2,9 @@
  * jCarouselLite - jQuery plugin to navigate images/any content in a carousel style widget.
  * @requires jQuery v1.4.2
  *
- * CUSTOMIZED BY:
+ * CUSTOMIZED / EVOLUTED BY:
  * 	@author Carlos Vincius < github.com/caljp13 >
- * 	@version: 1.2
+ * 	@version: 1.3
  *
  * ORIGINAL:
  * 	Copyright (c) 2007 Ganeshji Marwaha (gmarwaha.com)
@@ -208,7 +208,7 @@
 		var exec;
 		
 		exec = function(){
-			var running,animCss,sizeCss,$this,ul,tLi,tl,v,li,itemLength,curr,liSize,ulSize,divSize,isMouseOver;
+			var running,animCss,sizeCss,$this,ul,tLi,itemsVisible,li,itemLength,curr,liSize,ulSize,divSize,isMouseOver;
 			
 			running = false;
 			isMouseOver = false;
@@ -216,16 +216,16 @@
 			sizeCss = o.vertical ? "height" : "width";
 			$this = $(this);
 			ul = $this.children("ul");
-			tLi = ul.children("li");
-			tl = tLi.size();
-			v = o.visible;
+			li = ul.children("li");
+			itemsVisible = o.visible;
 
 			if(o.circular) {
-				ul.prepend(tLi.slice(tl-v-1+1).clone()).append(tLi.slice(0,v).clone());
-				o.start += v;
+				tLi = li;
+				ul.prepend(tLi.slice(tLi.size() - itemsVisible).clone()).append(tLi.slice(0,itemsVisible + 1).clone());
+				o.start += itemsVisible;
+				li = ul.children("li");
 			}
 
-			li = ul.children("li");
 			itemLength = li.size();
 			curr = o.start;
 			$this.css("visibility", "visible");
@@ -249,11 +249,12 @@
 			});
 
 			// Full li size(incl margin)-Used for animation
-			liSize = o.vertical ? height(li) : width(li);
+			// liSize = o.vertical ? height(li) : width(li);
+			liSize = o.vertical ? li.first().outerHeight(true) : li.first().outerWidth(true);
 			// size of full ul(total length, not just for the visible items)
 			ulSize = liSize * itemLength;
 			// size of entire div(total length for just the visible items)
-			divSize = liSize * v;
+			divSize = liSize * itemsVisible;
 
 			li.css({width: li.width(), height: li.height()});
 			ul.css(sizeCss, ulSize+"px").css(animCss, -(curr*liSize));
@@ -302,10 +303,12 @@
 				});
 
 			function vis() {
-				return li.slice(curr).slice(0,v);
+				return li.slice(curr).slice(0,itemsVisible);
 			};
 
 			function go(to) {
+				
+
 				if(running) return false;
 				
 				if(o.beforeStart)
@@ -314,27 +317,30 @@
 				// If circular we are in first or last, then goto the other end
 				if(o.circular) {
 					// If first, then goto last
-					if(to<=o.start-v-1) {
-						ul.css(animCss, -((itemLength-(v*2))*liSize)+"px");
+					if(to <= o.start - itemsVisible - 1) {
+						ul.css(animCss, -((itemLength-( itemsVisible *2))*liSize)+"px");
 						// If "scroll" > 1, then the "to" might not be equal to the condition; it can be lesser depending on the number of elements.
-						curr = to==o.start-v-1 ? itemLength-(v*2)-1 : itemLength-(v*2)-o.scroll;
+						curr = to==o.start - itemsVisible -1 ? itemLength - ( itemsVisible * 2) - 1 : itemLength - ( itemsVisible * 2) - o.scroll;
 					}
 					// If last, then goto first
-					else if(to>=itemLength-v+1) {
-						ul.css(animCss, -( (v) * liSize ) + "px" );
+					else if(to >= itemLength - itemsVisible) {
+						ul.css(animCss, -( ( itemsVisible ) * liSize ) + "px" );
 						// If "scroll" > 1, then the "to" might not be equal to the condition; it can be greater depending on the number of elements.
-						curr = to==itemLength-v+1 ? v+1 : v+o.scroll;
+						curr = (to == itemLength- itemsVisible +1) ?  itemsVisible +1 :  itemsVisible +o.scroll;
 					}
 					else
 						curr = to;
 				}
 				// If non-circular and to points to first or last, we just return.
 				else {
-					if(to<0 || to>itemLength-v)
+					if(to<0 || to>itemLength- itemsVisible )
 						return;
 					else
 						curr = to;
 				} // If neither overrides it, the curr will still be "to" and we can proceed.
+				
+				console.debug("Novo",to,curr);
+				console.debug(li.eq(to),li.eq(curr));
 
 				running = true;
 
@@ -349,7 +355,7 @@
 				// Disable buttons when the carousel reaches the last/first, and enable when not
 				if(!o.circular){
 					$(o.btnPrev + "," + o.btnNext).removeClass("disabled");
-					$((curr-o.scroll<0 && o.btnPrev) || (curr+o.scroll > itemLength-v && o.btnNext) || []).addClass("disabled");
+					$((curr-o.scroll<0 && o.btnPrev) || (curr+o.scroll > itemLength- itemsVisible  && o.btnNext) || []).addClass("disabled");
 				}
 			};
 		};
@@ -360,15 +366,15 @@
 		return elem;
 	};
 
-	function css(el, prop) {
+	/* function css(el, prop) {
 		return parseInt($.css(el[0], prop)) || 0;
-	};
-	function width(el) {
+	}; */
+	/* function width(el) {
 		return  el[0].offsetWidth + css(el, 'marginLeft') + css(el, 'marginRight');
-	};
-	function height(el) {
+	}; */
+	/* function height(el) {
 		return el[0].offsetHeight + css(el, 'marginTop') + css(el, 'marginBottom');
-	};
+	}; */
 	
 	// Atribuindo o plugin ao jQuery
 	$.fn.jCarouselLite=function(opts){
