@@ -4,7 +4,7 @@
  *
  * CUSTOMIZED / EVOLUTED BY:
  * 	@author Carlos Vincius < github.com/caljp13 >
- * 	@version: 1.3
+ * 	@version: 1.3.1
  *
  * ORIGINAL:
  * 	Copyright (c) 2007 Ganeshji Marwaha (gmarwaha.com)
@@ -339,9 +339,6 @@
 						curr = to;
 				} // If neither overrides it, the curr will still be "to" and we can proceed.
 				
-				console.debug("Novo",to,curr);
-				console.debug(li.eq(to),li.eq(curr));
-
 				running = true;
 
 				ul.animate(
